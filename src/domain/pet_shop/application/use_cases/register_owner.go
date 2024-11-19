@@ -15,6 +15,12 @@ type RegisterOwnerUseCaseRequest struct {
 	Email    string
 }
 
+// func NewRegisterOwnerUseCase(OwnerRepository repositories.OwnerRepository) RegisterOwnerUseCase {
+// 	return RegisterOwnerUseCase{
+// 		ownerRepository: OwnerRepository,
+// 	}
+// }
+
 type RegisterOwnerUseCase struct {
 	ownerRepository repositories.OwnerRepository
 }

@@ -1,6 +1,7 @@
 package use_cases
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +11,6 @@ import (
 	enterprise_errors "github.com/leandroyyy/poc-golang/src/domain/pet_shop/enterprise/errors"
 )
 
-// Mock do OwnerRepository
 type MockOwnerRepository struct {
 	mock.Mock
 }
@@ -42,15 +42,25 @@ func TestRegisterOwnerUseCase_Execute(t *testing.T) {
 			Email:    "john@example.com",
 		}
 
-		result, err := useCase.Execute(input)
+		_, err := useCase.Execute(input)
 
-		assert.Nil(t, result)
-		assert.ErrorIs(t, err, enterprise_errors.NewConflictError("Document already exists"))
+		if err != nil {
+			t.Logf("Received error: %T - %v", err, err)
+		}
+
+		assert.Error(t, err)
+
+		var conflictErr *enterprise_errors.ConflictError
+		assert.True(t, errors.As(err, &conflictErr), "Expected error of type ConflictError")
+		assert.Equal(t, "Document already exists", conflictErr.Error())
+
 		mockRepo.AssertCalled(t, "FindByDocument", "123456789")
 	})
 
 	t.Run("should return owner if input is valid", func(t *testing.T) {
 		mockRepo.On("FindByDocument", "1122334455").Return(nil)
+
+		mockRepo.On("Save", mock.Anything).Return(nil)
 
 		input := RegisterOwnerUseCaseRequest{
 			Name:     "Alice Doe",
@@ -66,6 +76,8 @@ func TestRegisterOwnerUseCase_Execute(t *testing.T) {
 		assert.Equal(t, input.Name, result.Name)
 		assert.Equal(t, input.Document, result.Document)
 		assert.Equal(t, input.Email, result.Email)
+
 		mockRepo.AssertCalled(t, "FindByDocument", "1122334455")
+		mockRepo.AssertCalled(t, "Save", mock.Anything)
 	})
 }

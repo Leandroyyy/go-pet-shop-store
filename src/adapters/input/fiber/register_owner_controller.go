@@ -21,7 +21,7 @@ func (r RegisterOwnerController) Execute(c fiber.Ctx) error {
 	var ownerDto dto
 
 	if err := c.BodyParser(&ownerDto); err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid JSON")
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid Payload")
 	}
 
 	owner, err := r.RegisterOwnerUseCase.Execute(use_cases.RegisterOwnerUseCaseRequest{
