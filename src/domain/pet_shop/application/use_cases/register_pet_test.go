@@ -1,10 +1,12 @@
 package use_cases
 
 import (
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/leandroyyy/poc-golang/src/domain/pet_shop/enterprise/entities"
+	enterprise_errors "github.com/leandroyyy/poc-golang/src/domain/pet_shop/enterprise/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -27,45 +29,15 @@ func TestRegisterPetUseCase_Execute(t *testing.T) {
 		petRepository:   mockPetRepo,
 	}
 
-	// t.Run("should return not found error when owner doesn't exists", func(t *testing.T) {
+	t.Run("should return not found error when owner doesn't exists", func(t *testing.T) {
 
-	// 	mockOwnerRepo.On("FindById", "123123").Return(nil)
+		// Resetar os mocks para evitar interferência
+		mockOwnerRepo.ExpectedCalls = nil
+		mockOwnerRepo.Calls = nil
 
-	// 	_, err := useCase.Execute(RegisterPetUseCaseRequest{
-	// 		OwnerId:  "123123",
-	// 		Name:     "Thor",
-	// 		Birthday: "2023-10-10",
-	// 		Breed:    "lhasa",
-	// 		Gender:   "male",
-	// 		Kind:     "dog",
-	// 	})
+		mockOwnerRepo.On("FindById", "123123").Return(nil)
 
-	// 	assert.Error(t, err)
-
-	// 	var notFoundErr *enterprise_errors.NotFoundError
-
-	// 	assert.True(t, errors.As(err, &notFoundErr), "Expected error of type NotFoundError")
-	// 	assert.Equal(t, "Owner doesn't exists", notFoundErr.Error())
-
-	// 	mockOwnerRepo.AssertCalled(t, "FindById", "123123")
-	// 	mockOwnerRepo.AssertNotCalled(t, "Edit")
-	// 	mockPetRepo.AssertNotCalled(t, "Save")
-	// })
-
-	t.Run("should be able to register a pet", func(t *testing.T) {
-		ownerId := "123123"
-		owner := entities.NewOwner(entities.OwnerProps{
-			Name:     "john due",
-			Document: "123213123",
-			Birthday: time.Now(),
-			Email:    "john@email.cm",
-		}, &ownerId)
-
-		mockOwnerRepo.On("FindById", "123123").Return(owner)
-		// mockOwnerRepo.On("Edit", mock.Anything).Return(nil)
-		// mockPetRepo.On("Save", mock.Anything).Return(nil)
-
-		result, err := useCase.Execute(RegisterPetUseCaseRequest{
+		_, err := useCase.Execute(RegisterPetUseCaseRequest{
 			OwnerId:  "123123",
 			Name:     "Thor",
 			Birthday: "2023-10-10",
@@ -74,15 +46,58 @@ func TestRegisterPetUseCase_Execute(t *testing.T) {
 			Kind:     "dog",
 		})
 
+		assert.Error(t, err)
+
+		var notFoundErr *enterprise_errors.NotFoundError
+
+		assert.True(t, errors.As(err, &notFoundErr), "Expected error of type NotFoundError")
+		assert.Equal(t, "Owner doesn't exists", notFoundErr.Error())
+
+		mockOwnerRepo.AssertCalled(t, "FindById", "123123")
+		mockOwnerRepo.AssertNotCalled(t, "Edit")
+		mockPetRepo.AssertNotCalled(t, "Save")
+	})
+
+	t.Run("should be able to register a pet", func(t *testing.T) {
+		mockOwnerRepo.ExpectedCalls = nil
+		mockOwnerRepo.Calls = nil
+		mockPetRepo.ExpectedCalls = nil
+		mockPetRepo.Calls = nil
+
+		ownerId := "123123"
+		owner := entities.NewOwner(entities.OwnerProps{
+			Name:     "john due",
+			Document: "123213123",
+			Birthday: time.Now(),
+			Email:    "john@email.cm",
+		}, &ownerId)
+
+		mockOwnerRepo.On("FindById", ownerId).Return(&owner)
+		mockOwnerRepo.On("Edit", mock.Anything).Return(nil)
+		mockPetRepo.On("Save", mock.Anything).Return(nil)
+
+		input := RegisterPetUseCaseRequest{
+			OwnerId:  "123123",
+			Name:     "Thor",
+			Birthday: "2023-10-10",
+			Breed:    "lhasa",
+			Gender:   "male",
+			Kind:     "dog",
+		}
+
+		result, err := useCase.Execute(input)
+
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
-		// assert.NotEmpty(t, result.Id, "Expected owner ID to be generated")
-		// assert.Equal(t, input.Name, result.Name)
-		// assert.Equal(t, input.Document, result.Document)
-		// assert.Equal(t, input.Email, result.Email)
+		assert.NotEmpty(t, result.Id, "Expected owner ID to be generated")
+		assert.Equal(t, result.Name, input.Name)
+		assert.Equal(t, result.Breed, input.Breed)
+		assert.Equal(t, result.Gender, input.Gender)
+		assert.Equal(t, result.Kind, input.Kind)
 
-		// mockRepo.AssertCalled(t, "FindByDocument", "1122334455")
-		// mockRepo.AssertCalled(t, "Save", mock.Anything)
+		mockOwnerRepo.AssertCalled(t, "FindById", "123123")
+		mockOwnerRepo.AssertCalled(t, "Edit", mock.Anything)
+		mockPetRepo.AssertCalled(t, "Save", mock.Anything)
 	})
 
 }
