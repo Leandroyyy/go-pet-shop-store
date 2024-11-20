@@ -28,6 +28,19 @@ func (m *MockOwnerRepository) Save(owner *entities.Owner) error {
 	return args.Error(0)
 }
 
+func (m *MockOwnerRepository) FindById(id string) *entities.Owner {
+	args := m.Called(id)
+	if owner, ok := args.Get(0).(*entities.Owner); ok {
+		return owner
+	}
+	return nil
+}
+
+func (m *MockOwnerRepository) Edit(owner *entities.Owner) error {
+	args := m.Called(owner)
+	return args.Error(0)
+}
+
 func TestRegisterOwnerUseCase_Execute(t *testing.T) {
 	mockRepo := new(MockOwnerRepository)
 	useCase := &RegisterOwnerUseCase{ownerRepository: mockRepo}
@@ -43,10 +56,6 @@ func TestRegisterOwnerUseCase_Execute(t *testing.T) {
 		}
 
 		_, err := useCase.Execute(input)
-
-		if err != nil {
-			t.Logf("Received error: %T - %v", err, err)
-		}
 
 		assert.Error(t, err)
 
@@ -73,6 +82,7 @@ func TestRegisterOwnerUseCase_Execute(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
+		assert.NotEmpty(t, result.Id, "Expected owner ID to be generated")
 		assert.Equal(t, input.Name, result.Name)
 		assert.Equal(t, input.Document, result.Document)
 		assert.Equal(t, input.Email, result.Email)

@@ -5,34 +5,40 @@ import (
 	"github.com/leandroyyy/poc-golang/src/domain/pet_shop/application/use_cases"
 )
 
-type dto struct {
-	name     string `json:"name"`
-	document string `json:"document"`
-	birthday string `json:"birthday"`
-	email    string `json:"email"`
+type registerOwnerDto struct {
+	Name     string `json:"name"`
+	Document string `json:"document"`
+	Birthday string `json:"birthday"`
+	Email    string `json:"email"`
 }
 
 type RegisterOwnerController struct {
-	RegisterOwnerUseCase use_cases.RegisterOwnerUseCase
+	registerOwnerUseCase use_cases.RegisterOwnerUseCase
 }
 
-func (r RegisterOwnerController) Execute(c fiber.Ctx) error {
+func NewRegisterOwnerController(registerOwnerUseCase use_cases.RegisterOwnerUseCase) RegisterOwnerController {
+	return RegisterOwnerController{
+		registerOwnerUseCase: registerOwnerUseCase,
+	}
+}
 
-	var ownerDto dto
+func (r RegisterOwnerController) Execute(c *fiber.Ctx) error {
+
+	var ownerDto registerOwnerDto
 
 	if err := c.BodyParser(&ownerDto); err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid Payload")
 	}
 
-	owner, err := r.RegisterOwnerUseCase.Execute(use_cases.RegisterOwnerUseCaseRequest{
-		Name:     ownerDto.name,
-		Document: ownerDto.document,
-		Birthday: ownerDto.birthday,
-		Email:    ownerDto.email,
+	owner, err := r.registerOwnerUseCase.Execute(use_cases.RegisterOwnerUseCaseRequest{
+		Name:     ownerDto.Name,
+		Document: ownerDto.Document,
+		Birthday: ownerDto.Birthday,
+		Email:    ownerDto.Email,
 	})
 
 	if err != nil {
-		return HandleError(&c, err)
+		return HandleError(c, err)
 	}
 
 	return c.JSON(fiber.Map{
@@ -40,6 +46,6 @@ func (r RegisterOwnerController) Execute(c fiber.Ctx) error {
 		"name":     owner.Name,
 		"email":    owner.Email,
 		"document": owner.Document,
-		"birthday": owner.Birthday,
+		"birthday": owner.Birthday.Format("2006-10-20"),
 	})
 }

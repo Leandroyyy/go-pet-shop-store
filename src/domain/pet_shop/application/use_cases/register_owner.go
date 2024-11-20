@@ -15,18 +15,17 @@ type RegisterOwnerUseCaseRequest struct {
 	Email    string
 }
 
-// func NewRegisterOwnerUseCase(OwnerRepository repositories.OwnerRepository) RegisterOwnerUseCase {
-// 	return RegisterOwnerUseCase{
-// 		ownerRepository: OwnerRepository,
-// 	}
-// }
+func NewRegisterOwnerUseCase(ownerRepository repositories.OwnerRepository) RegisterOwnerUseCase {
+	return RegisterOwnerUseCase{
+		ownerRepository: ownerRepository,
+	}
+}
 
 type RegisterOwnerUseCase struct {
 	ownerRepository repositories.OwnerRepository
 }
 
 func (r *RegisterOwnerUseCase) Execute(input RegisterOwnerUseCaseRequest) (*entities.Owner, error) {
-
 	documentAlreadyExists := r.ownerRepository.FindByDocument(input.Document)
 
 	if documentAlreadyExists != nil {

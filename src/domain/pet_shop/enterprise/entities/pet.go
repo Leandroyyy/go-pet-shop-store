@@ -30,7 +30,7 @@ type PetProps struct {
 }
 
 type Pet struct {
-	id string
+	Id string
 	PetProps
 }
 
@@ -42,7 +42,7 @@ func NewPet(pet PetProps, id *string) Pet {
 	}
 
 	return Pet{
-		id:       *id,
+		Id:       *id,
 		PetProps: pet,
 	}
 }

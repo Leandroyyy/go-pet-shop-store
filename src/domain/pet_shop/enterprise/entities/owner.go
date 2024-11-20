@@ -11,11 +11,23 @@ type OwnerProps struct {
 	Document string
 	Birthday time.Time
 	Email    string
+	Pets     *[]Pet
 }
 
 type Owner struct {
 	Id string
 	OwnerProps
+}
+
+func (o Owner) RegisterPet(pet Pet) {
+
+	if o.Pets == nil {
+		slice := []Pet{}
+		o.Pets = &slice
+	}
+
+	*o.Pets = append(*o.Pets, pet)
+
 }
 
 func NewOwner(owner OwnerProps, id *string) Owner {

@@ -7,6 +7,6 @@ import (
 type OwnerRepository interface {
 	Save(owner *entities.Owner) error
 	FindByDocument(document string) *entities.Owner
-	// FindyById(id string) (entities.Owner, error)
-	// Edit(owner entities.Owner) error
+	FindById(id string) *entities.Owner
+	Edit(owner *entities.Owner) error
 }
