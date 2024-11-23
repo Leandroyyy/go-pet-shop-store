@@ -6,7 +6,7 @@ import (
 	"github.com/leandroyyy/poc-golang/src/domain/pet_shop/enterprise/entities"
 )
 
-func MakeOwner() entities.Owner {
+func MakeOwner() *entities.Owner {
 	defaultProps := entities.OwnerProps{
 		Name:     "john due",
 		Document: "123132213",
@@ -14,5 +14,7 @@ func MakeOwner() entities.Owner {
 		Email:    "john@due.com",
 	}
 
-	return entities.NewOwner(defaultProps, nil)
+	owner := entities.NewOwner(defaultProps, nil)
+
+	return &owner
 }

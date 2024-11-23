@@ -3,10 +3,10 @@ package use_cases
 import (
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/leandroyyy/poc-golang/src/domain/pet_shop/enterprise/entities"
 	enterprise_errors "github.com/leandroyyy/poc-golang/src/domain/pet_shop/enterprise/errors"
+	test_factories "github.com/leandroyyy/poc-golang/tests/factories"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -31,7 +31,6 @@ func TestRegisterPetUseCase_Execute(t *testing.T) {
 
 	t.Run("should return not found error when owner doesn't exists", func(t *testing.T) {
 
-		// Resetar os mocks para evitar interferência
 		mockOwnerRepo.ExpectedCalls = nil
 		mockOwnerRepo.Calls = nil
 
@@ -61,16 +60,10 @@ func TestRegisterPetUseCase_Execute(t *testing.T) {
 	t.Run("should be able to register a pet", func(t *testing.T) {
 		mockOwnerRepo.ExpectedCalls = nil
 		mockOwnerRepo.Calls = nil
-		mockPetRepo.ExpectedCalls = nil
-		mockPetRepo.Calls = nil
 
 		ownerId := "123123"
-		owner := entities.NewOwner(entities.OwnerProps{
-			Name:     "john due",
-			Document: "123213123",
-			Birthday: time.Now(),
-			Email:    "john@email.cm",
-		}, &ownerId)
+		owner := *test_factories.MakeOwner()
+		owner.Id = ownerId
 
 		mockOwnerRepo.On("FindById", ownerId).Return(&owner)
 		mockOwnerRepo.On("Edit", mock.Anything).Return(nil)

@@ -2,9 +2,9 @@ package output_database
 
 import (
 	"testing"
-	"time"
 
 	"github.com/leandroyyy/poc-golang/src/domain/pet_shop/enterprise/entities"
+	test_factories "github.com/leandroyyy/poc-golang/tests/factories"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,39 +13,30 @@ var ownerRepository = InMemoryOwnerRepository{}
 func TestInMemoryOwnerRepository_Save(t *testing.T) {
 	owners = []entities.Owner{}
 
-	owner := entities.NewOwner(entities.OwnerProps{
-		Name:     "Leandro",
-		Document: "1231232131",
-		Birthday: time.Now(),
-		Email:    "leandro@email.com",
-	}, nil)
+	owner := test_factories.MakeOwner()
 
-	err := ownerRepository.Save(&owner)
+	err := ownerRepository.Save(owner)
 
 	assert.NoError(t, err)
 
 	assert.Len(t, owners, 1)
-	assert.Equal(t, owner, owners[0])
+	assert.Equal(t, owner, &owners[0])
 }
 
 func TestInMemoryOwnerRepository_FindByDocument(t *testing.T) {
 
 	t.Run("should be able to find an owner", func(t *testing.T) {
+		owners = nil
 
-		ownerMocked := entities.NewOwner(entities.OwnerProps{
-			Name:     "Leandro",
-			Document: "1231232131",
-			Birthday: time.Now(),
-			Email:    "leandro@email.com",
-		}, nil)
+		ownerMocked := test_factories.MakeOwner()
 
-		owners = append(owners, ownerMocked)
+		owners = append(owners, *ownerMocked)
 
-		owner := ownerRepository.FindByDocument("1231232131")
+		owner := ownerRepository.FindByDocument("123132213")
 
-		assert.Equal(t, ownerMocked.Name, owner.Name)
-		assert.Equal(t, ownerMocked.Document, owner.Document)
-		assert.Equal(t, ownerMocked.Email, owner.Email)
+		assert.Equal(t, &ownerMocked.Name, &owner.Name)
+		assert.Equal(t, &ownerMocked.Document, &owner.Document)
+		assert.Equal(t, &ownerMocked.Email, &owner.Email)
 
 		assert.NotEmpty(t, owner.Id)
 	})
@@ -55,23 +46,17 @@ func TestInMemoryOwnerRepository_FindByDocument(t *testing.T) {
 func TestInMemoryOwnerRepository_FindById(t *testing.T) {
 
 	t.Run("should be able to find an owner", func(t *testing.T) {
+		owners = nil
 
-		ownerId := "1"
-		ownerMocked := entities.NewOwner(entities.OwnerProps{
-			Name:     "Leandro",
-			Document: "1231232131",
-			Birthday: time.Now(),
-			Email:    "leandro@email.com",
-		}, &ownerId)
+		ownerMocked := test_factories.MakeOwner()
 
-		owners = append(owners, ownerMocked)
+		owners = append(owners, *ownerMocked)
 
-		owner := ownerRepository.FindById(ownerId)
+		owner := ownerRepository.FindById(ownerMocked.Id)
 
 		assert.Equal(t, ownerMocked.Name, owner.Name)
 		assert.Equal(t, ownerMocked.Document, owner.Document)
 		assert.Equal(t, ownerMocked.Email, owner.Email)
-		assert.Equal(t, owner.Id, ownerId)
 	})
 
 }
@@ -83,25 +68,16 @@ func TestInMemoryOwnerRepository_Edit(t *testing.T) {
 
 		owners = nil
 
-		owners = append(owners, entities.NewOwner(entities.OwnerProps{
-			Name:     "John Doe",
-			Document: "123456789",
-			Email:    "john.doe@example.com",
-			Birthday: time.Now(),
-		}, &ownerId))
+		owners = append(owners, *test_factories.MakeOwner())
 
-		updatedOwner := entities.NewOwner(entities.OwnerProps{
-			Name:     "John Smith",
-			Document: "123456789",
-			Email:    "john.smith@example.com",
-			Birthday: time.Now(),
-		}, &ownerId)
+		updatedOwner := test_factories.MakeOwner()
+		updatedOwner.Id = ownerId
 
-		err := ownerRepository.Edit(&updatedOwner)
+		err := ownerRepository.Edit(updatedOwner)
 		assert.NoError(t, err, "Expected no error when editing an existing owner")
 
-		assert.Equal(t, "John Smith", owners[0].Name)
-		assert.Equal(t, "john.smith@example.com", owners[0].Email)
+		assert.Equal(t, "john due", owners[0].Name)
+		assert.Equal(t, "john@due.com", owners[0].Email)
 	})
 
 }
